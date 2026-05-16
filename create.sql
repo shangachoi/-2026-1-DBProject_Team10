@@ -16,8 +16,8 @@
 
 DROP DATABASE IF EXISTS DB2026Team10; -- 테스트용으로 추가
 DROP USER IF EXISTS DB2026Team10@localhost;
-CREATE USER DB2026Team10@localhost IDENTIFIED WITH mysql_native_password by '
-DB2026Team10';
+CREATE USER DB2026Team10@localhost 
+IDENTIFIED WITH mysql_native_password by 'DB2026Team10';
 CREATE DATABASE DB2026Team10; -- 테스트용 "
 GRANT ALL PRIVILEGES ON DB2026Team10.* TO DB2026Team10@localhost WITH GRANT OPTION;
 COMMIT;
@@ -310,7 +310,8 @@ CREATE TABLE Reservation (
 
     /* 예약 상태 값 제한 */
     CONSTRAINT chk_reservation_state
-        CHECK (state IN ('예약완료', '취소', '촬영완료'))
+        CHECK (state IN ('예약완료', '취소', '촬영완료')),
+        
 	/* 같은 작가가 같은 시간에 여러 예약을 받을 수 없도록 제한 */
     CONSTRAINT uq_photographer_datetime
 	UNIQUE (photographer_id, reservation_date, reservation_time)
