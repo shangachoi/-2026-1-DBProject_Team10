@@ -6,20 +6,20 @@
 USE DB2026Team10;
 
 -- 뷰 먼저 삭제
-DROP VIEW IF EXISTS member_reservation_view;
-DROP VIEW IF EXISTS studio_search_view;
+DROP VIEW IF EXISTS Member_Reservation_View;
+DROP VIEW IF EXISTS Studio_Search_View;
 
 -- 외래키를 참조하는 자식 테이블부터 삭제
-DROP TABLE IF EXISTS reservation;
-DROP TABLE IF EXISTS studio_mood;
-DROP TABLE IF EXISTS studio_background;
-DROP TABLE IF EXISTS photographer;
+DROP TABLE IF EXISTS Reservation;
+DROP TABLE IF EXISTS Studio_mood;
+DROP TABLE IF EXISTS Studio_Background;
+DROP TABLE IF EXISTS Photographer;
 
 -- 부모 테이블 삭제
-DROP TABLE IF EXISTS mood;
-DROP TABLE IF EXISTS background;
-DROP TABLE IF EXISTS studio;
-DROP TABLE IF EXISTS member;
+DROP TABLE IF EXISTS Mood;
+DROP TABLE IF EXISTS Background;
+DROP TABLE IF EXISTS Studio;
+DROP TABLE IF EXISTS Member;
 
 -- 데이터베이스 삭제
 DROP DATABASE IF EXISTS DB2026Team10;

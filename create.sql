@@ -15,7 +15,12 @@
    ========================================================= */
 
 DROP DATABASE IF EXISTS DB2026Team10; -- 테스트용으로 추가
+DROP USER IF EXISTS DB2026Team10@localhost;
+CREATE USER DB2026Team10@localhost IDENTIFIED WITH mysql_native_password by '
+DB2026Team10';
 CREATE DATABASE DB2026Team10; -- 테스트용 "
+GRANT ALL PRIVILEGES ON DB2026Team10.* TO DB2026Team10@localhost WITH GRANT OPTION;
+COMMIT;
 USE DB2026Team10;
 
 
@@ -289,10 +294,26 @@ CREATE TABLE Reservation (
         REFERENCES Photographer(studio_id, photographer_id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
+	
+    /* 사진관이 제공하지 않는 배경/무드로 예약되는 것을 방지하기 위해 복합 외래키 추가 */
+	CONSTRAINT fk_reservation_studio_background
+		FOREIGN KEY (studio_id, background_id)
+		REFERENCES Studio_Background(studio_id, background_id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
+
+	CONSTRAINT fk_reservation_studio_mood
+		FOREIGN KEY (studio_id, mood_id)
+		REFERENCES Studio_Mood(studio_id, mood_id)
+		ON DELETE RESTRICT
+		ON UPDATE CASCADE,
 
     /* 예약 상태 값 제한 */
     CONSTRAINT chk_reservation_state
         CHECK (state IN ('예약완료', '취소', '촬영완료'))
+	/* 같은 작가가 같은 시간에 여러 예약을 받을 수 없도록 제한 */
+    CONSTRAINT uq_photographer_datetime
+	UNIQUE (photographer_id, reservation_date, reservation_time)
 );
 
 
