@@ -40,6 +40,19 @@ public class StudioDAO {
             return false;
         }
     }
+    public List findByName(String name) {
+        List list = new ArrayList<>();
+        String sql = "SELECT studio_id, name, address FROM Studio WHERE name LIKE ?"; // adjust columns
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setString(1, "%" + name + "%");
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) {
+                    list.add(new Studio(r.getInt("studio_id"), r.getString("name"), r.getString("address")));
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
 
     // 전체 스튜디오 조회
     public List<Studio> findAll() {

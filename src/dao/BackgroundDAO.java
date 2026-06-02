@@ -5,122 +5,69 @@ import dto.Background;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BackgroundDAO {
-
     private final Connection conn;
 
     public BackgroundDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public boolean register(Background background) {
-        String sql = "INSERT INTO Background (background_id, color, b_description) VALUES (?, ?, ?)";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, background.getBackgroundId());
-            pstmt.setString(2, background.getColor());
-            pstmt.setString(3, background.getDescription());
-
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public List<Background> findAll() {
-        List<Background> backgrounds = new ArrayList<>();
-
+    public List findAll() {
+        List list = new ArrayList<>();
         String sql = "SELECT background_id, color, b_description FROM Background";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                Background background = new Background(
-                        rs.getInt("background_id"),
-                        rs.getString("color"),
-                        rs.getString("b_description")
-                );
-                backgrounds.add(background);
+        try (PreparedStatement p = conn.prepareStatement(sql);
+             ResultSet r = p.executeQuery()) {
+            while (r.next()) {
+                // use 0 for studioId since Background is not directly bound to one studio
+                list.add(new Background(
+                        r.getInt("background_id"),
+                        r.getString("color"),
+                        0,
+                        r.getString("b_description")
+                ));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return backgrounds;
+        return list;
     }
 
-    public Optional<Background> findById(int backgroundId) {
-        String sql = "SELECT background_id, color, b_description FROM Background WHERE background_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, backgroundId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    Background background = new Background(
-                            rs.getInt("background_id"),
-                            rs.getString("color"),
-                            rs.getString("b_description")
-                    );
-                    return Optional.of(background);
+    public List findByStudio(int studioId) {
+        List list = new ArrayList<>();
+        String sql = "SELECT b.background_id, b.color, b.b_description " +
+                "FROM Background b JOIN Studio_Background sb ON b.background_id = sb.background_id " +
+                "WHERE sb.studio_id = ?";
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setInt(1, studioId);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) {
+                    list.add(new Background(
+                            r.getInt("background_id"),
+                            r.getString("color"),
+                            studioId,
+                            r.getString("b_description")
+                    ));
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return Optional.empty();
+        return list;
     }
 
-    public boolean update(Background background) {
-        String sql = "UPDATE Background SET color = ?, b_description = ? WHERE background_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, background.getColor());
-            pstmt.setString(2, background.getDescription());
-            pstmt.setInt(3, background.getBackgroundId());
-
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean delete(int backgroundId) {
-        String sql = "DELETE FROM Background WHERE background_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, backgroundId);
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean existsById(int backgroundId) {
-        String sql = "SELECT 1 FROM Background WHERE background_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, backgroundId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next();
+    public boolean isProvidedByStudio(int backgroundId, int studioId) {
+        String sql = "SELECT 1 FROM Studio_Background WHERE background_id = ? AND studio_id = ?";
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setInt(1, backgroundId);
+            p.setInt(2, studioId);
+            try (ResultSet r = p.executeQuery()) {
+                return r.next();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
 }

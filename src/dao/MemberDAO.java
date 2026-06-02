@@ -72,6 +72,20 @@ public class MemberDAO {
         System.out.println("로그아웃 처리(서버 세션 없음) — 클라이언트 측에서 토큰/상태 제거 필요");
     }
 
+    public boolean insert(Member member) {
+        String sql = "INSERT INTO Member (member_id, name, password, phone) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setString(1, member.getMemberId());
+            p.setString(2, member.getName());
+            p.setString(3, member.getPassword());
+            p.setString(4, member.getPhone());
+            return p.executeUpdate() == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // 회원탈퇴 by memberId
     public boolean deleteUser(String memberId) {
         String sql = "DELETE FROM Member WHERE member_id = ?";
@@ -96,5 +110,6 @@ public class MemberDAO {
             e.printStackTrace();
             return false;
         }
+
     }
 }

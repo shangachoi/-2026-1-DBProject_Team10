@@ -5,119 +5,64 @@ import dto.Mood;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MoodDAO {
-
     private final Connection conn;
 
     public MoodDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public boolean register(Mood mood) {
-        String sql = "INSERT INTO Mood (mood_id, mood_name, m_description) VALUES (?, ?, ?)";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, mood.getMoodId());
-            pstmt.setString(2, mood.getMoodName());
-            pstmt.setString(3, mood.getDescription());
-
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public List<Mood> findAll() {
-        List<Mood> moods = new ArrayList<>();
-
+    public List findAll() {
+        List list = new ArrayList<>();
         String sql = "SELECT mood_id, mood_name, m_description FROM Mood";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                Mood mood = new Mood(
-                        rs.getInt("mood_id"),
-                        rs.getString("mood_name"),
-                        rs.getString("m_description")
-                );
-                moods.add(mood);
+        try (PreparedStatement p = conn.prepareStatement(sql);
+             ResultSet r = p.executeQuery()) {
+            while (r.next()) {
+                list.add(new Mood(
+                        r.getInt("mood_id"),
+                        r.getString("mood_name"),
+                        0,
+                        r.getString("m_description")
+                ));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return moods;
+        return list;
     }
 
-    public Optional<Mood> findById(int moodId) {
-        String sql = "SELECT mood_id, mood_name, m_description FROM Mood WHERE mood_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, moodId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    Mood mood = new Mood(
-                            rs.getInt("mood_id"),
-                            rs.getString("mood_name"),
-                            rs.getString("m_description")
-                    );
-                    return Optional.of(mood);
+    public List findByStudio(int studioId) {
+        List list = new ArrayList<>();
+        String sql = "SELECT m.mood_id, m.mood_name, m.m_description " +
+                "FROM Mood m JOIN Studio_Mood sm ON m.mood_id = sm.mood_id " +
+                "WHERE sm.studio_id = ?";
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setInt(1, studioId);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) {
+                    list.add(new Mood(
+                            r.getInt("mood_id"),
+                            r.getString("mood_name"),
+                            studioId,
+                            r.getString("m_description")
+                    ));
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return Optional.empty();
+        return list;
     }
 
-    public boolean update(Mood mood) {
-        String sql = "UPDATE Mood SET mood_name = ?, m_description = ? WHERE mood_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, mood.getMoodName());
-            pstmt.setString(2, mood.getDescription());
-            pstmt.setInt(3, mood.getMoodId());
-
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean delete(int moodId) {
-        String sql = "DELETE FROM Mood WHERE mood_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, moodId);
-            return pstmt.executeUpdate() == 1;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean existsById(int moodId) {
-        String sql = "SELECT 1 FROM Mood WHERE mood_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, moodId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                return rs.next();
+    public boolean isProvidedByStudio(int moodId, int studioId) {
+        String sql = "SELECT 1 FROM Studio_Mood WHERE mood_id = ? AND studio_id = ?";
+        try (PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setInt(1, moodId);
+            p.setInt(2, studioId);
+            try (ResultSet r = p.executeQuery()) {
+                return r.next();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
