@@ -13,6 +13,10 @@ public class Studio {
         this.phone = phone;
     }
 
+    public Studio(int studioId, String name, String address) {
+        this(studioId, name, address, /* set other fields or defaults */ "");
+    }
+
     public int getStudioId() { return studioId; }
     public void setStudioId(int studioId) { this.studioId = studioId; }
 

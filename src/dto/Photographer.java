@@ -4,55 +4,58 @@ public class Photographer {
     private int photographerId;
     private String photographerName;
     private int studioId;
-    private String career;
-    private String specialty;
+    private String phone;
+    private String description;
 
-    public Photographer(int photographerId, String photographerName, int studioId, String career, String specialty) {
+    public Photographer(int photographerId, String photographerName, int studioId) {
+        this(photographerId, photographerName, studioId, null, null);
+    }
+
+    public Photographer(int photographerId, String photographerName, int studioId, String phone, String description) {
         this.photographerId = photographerId;
         this.photographerName = photographerName;
         this.studioId = studioId;
-        this.career = career;
-        this.specialty = specialty;
+        this.phone = phone;
+        this.description = description;
     }
 
     public int getPhotographerId() {
         return photographerId;
     }
 
-    public void setPhotographerId(int photographerId) {
-        this.photographerId = photographerId;
-    }
-
     public String getPhotographerName() {
         return photographerName;
-    }
-
-    public void setPhotographerName(String photographerName) {
-        this.photographerName = photographerName;
     }
 
     public int getStudioId() {
         return studioId;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setPhotographerId(int photographerId) {
+        this.photographerId = photographerId;
+    }
+
+    public void setPhotographerName(String photographerName) {
+        this.photographerName = photographerName;
+    }
+
     public void setStudioId(int studioId) {
         this.studioId = studioId;
     }
 
-    public String getCareer() {
-        return career;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public void setCareer(String career) {
-        this.career = career;
+    public void setDescription(String description) {
+        this.description = description;
     }
-
-    public String getSpecialty() {
-        return specialty;
-    }
-
-    public void setSpecialty(String specialty) {
-        this.specialty = specialty;
-    }
-
 }
