@@ -6,6 +6,7 @@
 	Mood
 	Photographer
 	Reservation
+    
    =========================================================== */
 
 
@@ -241,7 +242,7 @@ CREATE TABLE Studio_Mood (
    ========================================================= */
 
 CREATE TABLE Reservation (
-    reservation_id INT NOT NULL,
+    reservation_id INT NOT NULL AUTO_INCREMENT,
     member_id VARCHAR(20) NOT NULL,
     studio_id INT NOT NULL,
     photographer_id INT NOT NULL,
