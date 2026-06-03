@@ -275,6 +275,8 @@ public class Main {
                                 int rMoodId = Integer.parseInt(scanner.nextLine().trim());
                                 System.out.print("예약 날짜 (YYYY-MM-DD): ");
                                 String dateStr = scanner.nextLine().trim();
+                                System.out.print("예약 시간 (HH:MM:SS): ");
+                                String timeStr = scanner.nextLine().trim();
 
                                 LocalDate rDate;
                                 try {
@@ -330,7 +332,7 @@ public class Main {
                                     }
 
                                     // conflict check: photographer at same date (simple check by reservation_date)
-                                    if (reservationDao.existsConflict(rPhotographerId, rDate)) {
+                                    if (reservationDao.existsConflict(rPhotographerId, rDate, timeStr)) {
                                         System.out.println("해당 시간대에 사진작가 예약이 이미 존재합니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
@@ -339,7 +341,7 @@ public class Main {
 
                                     // insert reservation (let DAO generate reservation id or return success)
                                     Reservation r = new Reservation(0, currentMemberId, rStudioId, rPhotographerId,
-                                            rBackgroundId, rMoodId, rDate, "예약완료");
+                                            rBackgroundId, rMoodId, rDate, timeStr, "예약완료");
                                     int createdId = reservationDao.insert(r); // should return generated id or -1
                                                                                     // on fail
                                     if (createdId > 0) {
