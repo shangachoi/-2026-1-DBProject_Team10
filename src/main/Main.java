@@ -22,8 +22,8 @@ public class Main {
             PhotographerDAO photographerDao = new PhotographerDAO(conn);
             BackgroundDAO backgroundDao = new BackgroundDAO(conn);
             MoodDAO moodDao = new MoodDAO(conn);
-            ReservationDAO reservationDao = new ReservationDAO();
-            // ViewDAO viewDao = new ViewDAO();
+            ReservationDAO reservationDao = new ReservationDAO(conn);
+            ViewDAO viewDao = new ViewDAO(conn);
 
             boolean running = true;
             boolean loggedIn = false;
@@ -51,12 +51,12 @@ public class Main {
 
                             Member newMember = new Member(regId, regPw, regName, regPhone);
                             try {
-                                if (memberDao.insert(conn, newMember)) {
+                                if (memberDao.insert(newMember)) {
                                     System.out.println("회원가입 성공.");
                                 } else {
                                     System.out.println("회원가입 실패(중복 또는 DB 오류).");
                                 }
-                            } catch (SQLException e) {
+                            } catch (Exception e) {
                                 System.err.println("회원가입 오류: " + e.getMessage());
                             }
                             break;
@@ -67,7 +67,7 @@ public class Main {
                             System.out.print("비밀번호: ");
                             String loginPw = scanner.nextLine().trim();
                             try {
-                                Optional<Member> mOpt = memberDao.findById(conn, loginId);
+                                Optional<Member> mOpt = memberDao.findById(loginId);
                                 if (mOpt.isPresent() && mOpt.get().getPassword().equals(loginPw)) {
                                     loggedIn = true;
                                     currentMemberId = loginId;
@@ -75,7 +75,7 @@ public class Main {
                                 } else {
                                     System.out.println("로그인 실패(아이디/비밀번호 확인).");
                                 }
-                            } catch (SQLException e) {
+                            } catch (Exception e) {
                                 System.err.println("로그인 오류: " + e.getMessage());
                             }
                             break;
@@ -240,7 +240,7 @@ public class Main {
                                 break;
 
                             case "9": // all backgrounds
-                                List<Background> bAll = backgroundDao.findAll(conn);
+                                List<Background> bAll = backgroundDao.findAll();
                                 bAll.forEach(b -> System.out.println(
                                         b.getBackgroundId() + " | " + b.getColor() + " | " + b.getDescription()));
                                 break;
@@ -248,19 +248,19 @@ public class Main {
                             case "10": // backgrounds by studio
                                 System.out.print("사진관 ID: ");
                                 int bSid = Integer.parseInt(scanner.nextLine().trim());
-                                List<Background> bBy = backgroundDao.findByStudio(conn, bSid);
+                                List<Background> bBy = backgroundDao.findByStudio(bSid);
                                 bBy.forEach(b -> System.out.println(b.getBackgroundId() + " | " + b.getColor()));
                                 break;
 
                             case "11": // all moods
-                                List<Mood> mAll = moodDao.findAll(conn);
+                                List<Mood> mAll = moodDao.findAll();
                                 mAll.forEach(m -> System.out.println(m.getMoodId() + " | " + m.getMoodName()));
                                 break;
 
                             case "12": // moods by studio
                                 System.out.print("사진관 ID: ");
                                 int mSid = Integer.parseInt(scanner.nextLine().trim());
-                                List<Mood> mBy = moodDao.findByStudio(conn, mSid);
+                                List<Mood> mBy = moodDao.findByStudio(mSid);
                                 mBy.forEach(m -> System.out.println(m.getMoodId() + " | " + m.getMoodName()));
                                 break;
 
@@ -289,7 +289,7 @@ public class Main {
                                     conn.setAutoCommit(false);
 
                                     // validate member exists
-                                    if (!memberDao.existsById(conn, currentMemberId)) {
+                                    if (!memberDao.existsById(currentMemberId)) {
                                         System.out.println("회원 정보가 없습니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
@@ -297,32 +297,32 @@ public class Main {
                                     }
 
                                     // validate studio, photographer, background, mood existence and relationships
-                                    if (!studioDao.existsById(conn, rStudioId)) {
+                                    if (!studioDao.existsById(rStudioId)) {
                                         System.out.println("사진관 없음.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
                                         break;
                                     }
-                                    if (!photographerDao.existsById(conn, rPhotographerId)) {
+                                    if (!photographerDao.existsById(rPhotographerId)) {
                                         System.out.println("사진작가 없음.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
                                         break;
                                     }
                                     // photographer belongs to studio
-                                    if (!photographerDao.isInStudio(conn, rPhotographerId, rStudioId)) {
+                                    if (!photographerDao.isInStudio(rPhotographerId, rStudioId)) {
                                         System.out.println("선택한 사진작가가 해당 사진관 소속이 아닙니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
                                         break;
                                     }
-                                    if (!backgroundDao.isProvidedByStudio(conn, rBackgroundId, rStudioId)) {
+                                    if (!backgroundDao.isProvidedByStudio(rBackgroundId, rStudioId)) {
                                         System.out.println("해당 사진관에서 제공하지 않는 배경입니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
                                         break;
                                     }
-                                    if (!moodDao.isProvidedByStudio(conn, rMoodId, rStudioId)) {
+                                    if (!moodDao.isProvidedByStudio(rMoodId, rStudioId)) {
                                         System.out.println("해당 사진관에서 제공하지 않는 무드입니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
@@ -330,7 +330,7 @@ public class Main {
                                     }
 
                                     // conflict check: photographer at same date (simple check by reservation_date)
-                                    if (reservationDao.existsConflict(conn, rPhotographerId, rDate)) {
+                                    if (reservationDao.existsConflict(rPhotographerId, rDate)) {
                                         System.out.println("해당 시간대에 사진작가 예약이 이미 존재합니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
@@ -340,7 +340,7 @@ public class Main {
                                     // insert reservation (let DAO generate reservation id or return success)
                                     Reservation r = new Reservation(0, currentMemberId, rStudioId, rPhotographerId,
                                             rBackgroundId, rMoodId, rDate, "예약완료");
-                                    int createdId = reservationDao.insert(conn, r); // should return generated id or -1
+                                    int createdId = reservationDao.insert(r); // should return generated id or -1
                                                                                     // on fail
                                     if (createdId > 0) {
                                         conn.commit();
@@ -364,7 +364,7 @@ public class Main {
                                 break;
 
                             case "14": // my reservations
-                                List<Reservation> mine = reservationDao.findByMember(conn, currentMemberId);
+                                List<Reservation> mine = reservationDao.findByMember(currentMemberId);
                                 System.out.println("=== 내 예약 ===");
                                 mine.forEach(r -> System.out.println(
                                         r.getReservationId() + " | " + r.getReservationDate() + " | " + r.getState()));
@@ -379,7 +379,7 @@ public class Main {
                                     System.out.println("올바른 상태가 아닙니다.");
                                     break;
                                 }
-                                if (reservationDao.updateState(conn, upId, newState))
+                                if (reservationDao.updateState(upId, newState))
                                     System.out.println("상태 변경 완료.");
                                 else
                                     System.out.println("상태 변경 실패.");
@@ -388,7 +388,7 @@ public class Main {
                             case "16": // cancel reservation (set state to 취소)
                                 System.out.print("취소할 예약 ID: ");
                                 int cancelId = Integer.parseInt(scanner.nextLine().trim());
-                                if (reservationDao.updateState(conn, cancelId, "취소"))
+                                if (reservationDao.updateState(cancelId, "취소"))
                                     System.out.println("취소 완료.");
                                 else
                                     System.out.println("취소 실패.");
@@ -401,7 +401,7 @@ public class Main {
                                 break;
 
                             case "18": // member reservation view
-                                List<MemberReservationDto> mv = viewDao.getMemberReservationView(conn, currentMemberId);
+                                List<MemberReservation> mv = viewDao.getMemberReservationView(conn, currentMemberId);
                                 mv.forEach(v -> System.out.println(v.getReservationId() + " | " + v.getStudioName()
                                         + " | " + v.getPhotographerName() + " | " + v.getReservationDate() + " | "
                                         + v.getState()));
@@ -422,7 +422,7 @@ public class Main {
                         }
                     } catch (NumberFormatException nfe) {
                         System.out.println("숫자 형식 오류: " + nfe.getMessage());
-                    } catch (SQLException se) {
+                    } catch (Exception se) {
                         System.err.println("DB 오류: " + se.getMessage());
                     }
                 }

@@ -24,12 +24,11 @@ public class StudioDAO {
 
         List<Studio> studios = new ArrayList<>();
 
-        String sql =
-                "SELECT studio_id, studio_name, location, studio_phone "
-              + "FROM Studio";
+        String sql = "SELECT studio_id, studio_name, location, studio_phone "
+                + "FROM Studio";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
 
@@ -37,8 +36,7 @@ public class StudioDAO {
                         rs.getInt("studio_id"),
                         rs.getString("studio_name"),
                         rs.getString("location"),
-                        rs.getString("studio_phone")
-                );
+                        rs.getString("studio_phone"));
 
                 studios.add(studio);
             }
@@ -50,13 +48,12 @@ public class StudioDAO {
         return studios;
     }
 
-    // ID로 스튜디오 조회
+    // ID로 사진관 조회
     public Optional<Studio> findById(int studioId) {
 
-        String sql =
-                "SELECT studio_id, studio_name, location, studio_phone "
-              + "FROM Studio "
-              + "WHERE studio_id = ?";
+        String sql = "SELECT studio_id, studio_name, location, studio_phone "
+                + "FROM Studio "
+                + "WHERE studio_id = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -70,8 +67,7 @@ public class StudioDAO {
                             rs.getInt("studio_id"),
                             rs.getString("studio_name"),
                             rs.getString("location"),
-                            rs.getString("studio_phone")
-                    );
+                            rs.getString("studio_phone"));
 
                     return Optional.of(studio);
                 }
@@ -84,13 +80,34 @@ public class StudioDAO {
         return Optional.empty();
     }
 
-       // 이름으로 사진관 검색
+    // 사진관 존재 여부 확인
+    public boolean existsById(int studioId) {
+
+        String sql = "SELECT 1 FROM Studio WHERE studio_id = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, studioId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    // 이름으로 사진관 검색
     public List<Studio> findByName(String keyword) {
 
         List<Studio> studios = new ArrayList<>();
 
-        String sql =
-                "SELECT studio_id, studio_name, " +
+        String sql = "SELECT studio_id, studio_name, " +
                 "location, studio_phone " +
                 "FROM Studio " +
                 "WHERE studio_name LIKE ?";
@@ -107,8 +124,7 @@ public class StudioDAO {
                             rs.getInt("studio_id"),
                             rs.getString("studio_name"),
                             rs.getString("location"),
-                            rs.getString("studio_phone")
-                    );
+                            rs.getString("studio_phone"));
 
                     studios.add(studio);
                 }
@@ -122,41 +138,39 @@ public class StudioDAO {
     }
 
     // 지역으로 사진관 검색
-public List<Studio> findByLocation(String location) {
+    public List<Studio> findByLocation(String location) {
 
-    List<Studio> studios = new ArrayList<>();
+        List<Studio> studios = new ArrayList<>();
 
-    String sql =
-            "SELECT studio_id, studio_name, " +
-            "location, studio_phone " +
-            "FROM Studio " +
-            "WHERE location LIKE ?";
+        String sql = "SELECT studio_id, studio_name, " +
+                "location, studio_phone " +
+                "FROM Studio " +
+                "WHERE location LIKE ?";
 
-    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        pstmt.setString(1, "%" + location + "%");
+            pstmt.setString(1, "%" + location + "%");
 
-        try (ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
 
-            while (rs.next()) {
+                while (rs.next()) {
 
-                Studio studio = new Studio(
-                        rs.getInt("studio_id"),
-                        rs.getString("studio_name"),
-                        rs.getString("location"),
-                        rs.getString("studio_phone")
-                );
+                    Studio studio = new Studio(
+                            rs.getInt("studio_id"),
+                            rs.getString("studio_name"),
+                            rs.getString("location"),
+                            rs.getString("studio_phone"));
 
-                studios.add(studio);
+                    studios.add(studio);
+                }
             }
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
         }
 
-    } catch (SQLException e) {
-
-        e.printStackTrace();
+        return studios;
     }
-
-    return studios;
-}
 
 }
