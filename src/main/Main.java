@@ -284,6 +284,13 @@ public class Main {
                                     break;
                                 }
 
+                                System.out.print("예약 시간 (HH:mm): ");
+                                String timeStr = scanner.nextLine().trim();
+                                if (timeStr.isEmpty()) {
+                                    System.out.println("예약 시간은 필수입니다.");
+                                    break;
+                                }
+
                                 // transaction begin
                                 try {
                                     conn.setAutoCommit(false);
