@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) {
-        try (Connection conn = Util.getConnection();
-                Scanner scanner = new Scanner(System.in)) {
+        try (Connection conn = Util.getConnection(); Scanner scanner = new Scanner(System.in)) {
 
             MemberDAO memberDao = new MemberDAO(conn);
             StudioDAO studioDao = new StudioDAO(conn);
@@ -109,7 +109,8 @@ public class Main {
                     System.out.println("16. 예약 취소");
                     System.out.println("17. 사진관 검색 뷰 조회");
                     System.out.println("18. 내 예약 뷰 조회");
-                    System.out.println("19. 로그아웃");
+                    System.out.println("19. 예약 삭제");
+                    System.out.println("20. 로그아웃");
                     System.out.println("0. 종료");
                     System.out.print("선택: ");
 
@@ -168,8 +169,8 @@ public class Main {
                                 } else {
                                     locationResult.forEach(s -> System.out.println(
                                             "사진관 번호: " + s.getStudioId()
-                                                    + " | 이름: " + s.getStudioName()
-                                                    + " | 위치: " + s.getLocation()));
+                                            + " | 이름: " + s.getStudioName()
+                                            + " | 위치: " + s.getLocation()));
                                 }
                                 break;
 
@@ -179,10 +180,10 @@ public class Main {
                                 System.out.println("\n[전체 사진작가 목록]");
                                 photographers.forEach(p -> System.out.println(
                                         "작가 번호: " + p.getPhotographerId()
-                                                + " | 이름: " + p.getPhotographerName()
-                                                + " | 소속 사진관: " + p.getStudioId()
-                                                + " | 경력: " + p.getCareer()
-                                                + " | 전문 분야: " + p.getSpecialty()));
+                                        + " | 이름: " + p.getPhotographerName()
+                                        + " | 소속 사진관: " + p.getStudioId()
+                                        + " | 경력: " + p.getCareer()
+                                        + " | 전문 분야: " + p.getSpecialty()));
                                 break;
 
                             // 6. 사진관별 사진작가 조회
@@ -198,9 +199,9 @@ public class Main {
                                     System.out.println("\n[사진작가 목록]");
                                     byStudio.forEach(p -> System.out.println(
                                             "작가 번호: " + p.getPhotographerId()
-                                                    + " | 이름: " + p.getPhotographerName()
-                                                    + " | 경력: " + p.getCareer()
-                                                    + " | 전문 분야: " + p.getSpecialty()));
+                                            + " | 이름: " + p.getPhotographerName()
+                                            + " | 경력: " + p.getCareer()
+                                            + " | 전문 분야: " + p.getSpecialty()));
                                 }
                                 break;
 
@@ -215,8 +216,8 @@ public class Main {
                                 } else {
                                     specialtyResult.forEach(p -> System.out.println(
                                             "작가 번호: " + p.getPhotographerId()
-                                                    + " | 이름: " + p.getPhotographerName()
-                                                    + " | 전문 분야: " + p.getSpecialty()));
+                                            + " | 이름: " + p.getPhotographerName()
+                                            + " | 전문 분야: " + p.getSpecialty()));
                                 }
                                 break;
 
@@ -232,9 +233,8 @@ public class Main {
                                 } else {
                                     careerResult.forEach(p -> System.out.println(
                                             "작가 번호: " + p.getPhotographerId()
-                                                    + " | 이름: " + p.getPhotographerName()
-                                                    + " | 경력: " + p.getCareer())
-
+                                            + " | 이름: " + p.getPhotographerName()
+                                            + " | 경력: " + p.getCareer())
                                     );
                                 }
                                 break;
@@ -290,6 +290,9 @@ public class Main {
                                     System.out.println("예약 시간은 필수입니다.");
                                     break;
                                 }
+                                if (timeStr.length() == 5) {
+                                    timeStr = timeStr + ":00";
+                                }
 
                                 // transaction begin
                                 try {
@@ -336,8 +339,8 @@ public class Main {
                                         break;
                                     }
 
-                                    // conflict check: photographer at same date (simple check by reservation_date)
-                                    if (reservationDao.existsConflict(rPhotographerId, rDate)) {
+                                    // conflict check: photographer at same date and time (simple check by reservation_date and reservation_time)
+                                    if (reservationDao.existsConflict(rPhotographerId, rDate, timeStr)) {
                                         System.out.println("해당 시간대에 사진작가 예약이 이미 존재합니다.");
                                         conn.rollback();
                                         conn.setAutoCommit(true);
@@ -346,9 +349,9 @@ public class Main {
 
                                     // insert reservation (let DAO generate reservation id or return success)
                                     Reservation r = new Reservation(0, currentMemberId, rStudioId, rPhotographerId,
-                                            rBackgroundId, rMoodId, rDate, "예약완료");
+                                            rBackgroundId, rMoodId, rDate, timeStr, "예약완료");
                                     int createdId = reservationDao.insert(r); // should return generated id or -1
-                                                                                    // on fail
+                                    // on fail
                                     if (createdId > 0) {
                                         conn.commit();
                                         System.out.println("예약 생성 성공. 예약 ID: " + createdId);
@@ -386,19 +389,21 @@ public class Main {
                                     System.out.println("올바른 상태가 아닙니다.");
                                     break;
                                 }
-                                if (reservationDao.updateState(upId, newState))
+                                if (reservationDao.updateState(upId, newState)) {
                                     System.out.println("상태 변경 완료.");
-                                else
+                                } else {
                                     System.out.println("상태 변경 실패.");
+                                }
                                 break;
 
                             case "16": // cancel reservation (set state to 취소)
                                 System.out.print("취소할 예약 ID: ");
                                 int cancelId = Integer.parseInt(scanner.nextLine().trim());
-                                if (reservationDao.updateState(cancelId, "취소"))
+                                if (reservationDao.updateState(cancelId, "취소")) {
                                     System.out.println("취소 완료.");
-                                else
+                                } else {
                                     System.out.println("취소 실패.");
+                                }
                                 break;
 
                             case "17": // view: studio search view
@@ -414,7 +419,18 @@ public class Main {
                                         + v.getState()));
                                 break;
 
-                            case "19": // logout
+                            case "19": // delete reservation
+                                System.out.print("삭제할 예약 ID: ");
+                                int deleteId = Integer.parseInt(scanner.nextLine().trim());
+
+                                if (reservationDao.delete(deleteId)) {
+                                    System.out.println("예약 삭제 완료."); 
+                                }else {
+                                    System.out.println("예약 삭제 실패.");
+                                }
+                                break;
+
+                            case "20": // logout
                                 loggedIn = false;
                                 currentMemberId = null;
                                 System.out.println("로그아웃 되었습니다.");

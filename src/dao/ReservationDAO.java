@@ -1,7 +1,6 @@
 package dao;
 
 import dto.Reservation;
-
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -255,12 +254,13 @@ public class ReservationDAO {
     }
 
     // New: check conflict for a photographer on a given date (exclude canceled)
-    public boolean existsConflict(int photographerId, LocalDate date) {
-        String sql = "SELECT 1 FROM Reservation WHERE photographer_id = ? AND reservation_date = ? AND state <> '취소'";
+    public boolean existsConflict(int photographerId, LocalDate date, String time) {
+        String sql = "SELECT 1 FROM Reservation WHERE photographer_id = ? AND reservation_date = ? AND reservation_time = ? AND state <> '취소'";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, photographerId);
             pstmt.setDate(2, Date.valueOf(date));
+            pstmt.setString(3, time);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();
