@@ -1,7 +1,7 @@
 ## 파일 구성
 
-- `mysql-connector-j-8.4.0.jar`  
-  - MySQL JDBC 드라이버입니다. (버전은 예시, 실제 사용 버전에 맞게 작성)
+- `mysql-connector-j-9.3.0.jar`  
+  - MySQL JDBC 드라이버입니다.
 
 ## 준비 단계
 
@@ -10,12 +10,9 @@
 
 3. 아래와 같이 **MySQL Connector/J 파일을 프로젝트 lib 폴더로 복사**합니다.
 
-- 압축을 해제하면 `mysql-connector-j-9.3.0` 폴더 안에 `.jar` 파일이 있습니다.  
-  (예: `mysql-connector-j-9.3.0.jar`)
-
-- 그 `.jar` 파일을 다음 경로로 옮깁니다.
+- 압축을 해제하면 `mysql-connector-j-9.3.0` 폴더가 보입니다
 
 ```text
 -2026-1-DBProject_Team10/
   lib/
-    mysql-connector-j-9.3.0.jar   ← 여기에 위치하도록 복사
+    mysql-connector-j-9.3.0.   ← 여기에 위치하도록 복사
