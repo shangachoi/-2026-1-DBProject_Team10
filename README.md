@@ -7,7 +7,7 @@
   - Java 프로젝트 폴더입니다.
   - 구성:
     - `lib/`
-      - JDBC 드라이버(`mysql-connector-j-9.3.0.jar`)를 위치시켜야 합니다.
+      - JDBC 드라이버(`mysql-connector-j-9.3.0`)를 위치시켜야 합니다.
     - `src/`
       - `dao/` : DAO 클래스 파일들이 있습니다.
       - `dto/` : DTO 클래스 파일들이 있습니다.
@@ -19,12 +19,12 @@
 1. `mysql-connector-j-9.3.0.zip` 압축 해제
 2. `-2026-1-DBProject_Team10-main.zip` 압축 해제
 
-3. 아래와 같이 **MySQL Connector/J .jar 파일을 프로젝트 lib 폴더로 복사**합니다.
+3. 아래와 같이 **mysql-connector-j-9.3.0 폴더를 프로젝트 lib 폴더로 복사**합니다.
 
-- 압축을 해제하면 `mysql-connector-j-9.3.0` 폴더 안에 `mysql-connector-j-9.3.0.jar` 파일이 있습니다.
-- 이 `.jar` 파일을 다음 경로로 복사합니다.
+- 압축을 해제하면 `mysql-connector-j-9.3.0` 폴더가 보입니다.
+- 이 폴더 전체를 다음 경로로 복사합니다.
 
 ```text
 -2026-1-DBProject_Team10-main/
   lib/
-    mysql-connector-j-9.3.0.jar   ← 여기에 위치하도록 복사
+    mysql-connector-j-9.3.0   ← 여기에 위치하도록 복사
