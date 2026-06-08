@@ -1,13 +1,16 @@
 /* ==========================================================
-   현재 작성 테이블
-	Member
-	Studio
-	Background
-	Mood
-	Photographer
-	Reservation
-    
-   =========================================================== */
+   사용자 맞춤형 사진관 예약 시스템 데이터베이스 생성 스크립트
+
+   포함 테이블:
+   Member
+   Studio
+   Background
+   Mood
+   Photographer
+   Studio_Background
+   Studio_Mood
+   Reservation
+   ========================================================== */
 
 
 
@@ -15,24 +18,20 @@
    1. 데이터베이스 선택
    ========================================================= */
 
-DROP DATABASE IF EXISTS DB2026Team10; -- 테스트용으로 추가
+DROP DATABASE IF EXISTS DB2026Team10;
 DROP USER IF EXISTS DB2026Team10@localhost;
 CREATE USER DB2026Team10@localhost 
 IDENTIFIED WITH mysql_native_password by 'DB2026Team10';
-CREATE DATABASE DB2026Team10; -- 테스트용 "
+CREATE DATABASE DB2026Team10;
 GRANT ALL PRIVILEGES ON DB2026Team10.* TO DB2026Team10@localhost WITH GRANT OPTION;
 COMMIT;
 USE DB2026Team10;
 
 
 /* =========================================================
-   2. 기존 기본 테이블 삭제
-   재실행 시 오류를 방지하기 위해 자식 테이블부터 삭제한다.
-
-   주의:
-   연결 테이블 Studio_Background, Studio_Mood는
-   삭제 테이블은 안넣어놔서 밑에다 추가하시면 됩니다!. 
-   -> 연결 테이블 및 뷰 추가했습니다. 연결 테이블은 Reservation 앞에 넣었습니다!
+   2. 기존 테이블 및 뷰 삭제
+   재실행 시 오류를 방지하기 위해 뷰를 먼저 삭제하고,
+   외래키 참조 관계를 고려하여 자식 테이블부터 삭제한다.
    ========================================================= */
 
 DROP VIEW IF EXISTS Member_Reservation_View;
